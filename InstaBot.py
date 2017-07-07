@@ -1,17 +1,14 @@
 import requests,urllib
-import matplotlib.pyplot as plt
 from textblob import TextBlob
 from textblob.sentiments import NaiveBayesAnalyzer
+from matplotlib.ticker import FuncFormatter
+import matplotlib.pyplot as plt
+import numpy as np
 
 APP_ACCESS_TOKEN = '1946858049.0a70fa9.f8593965a37a472e9d9ed564dc32b7a5'
 BASE_URL = 'https://api.instagram.com/v1/'
 
 
-'''
-c=[]
-d=[]
-e=[]
-'''
 
 def self_info():
 
@@ -189,7 +186,6 @@ def delete_negative_comment(insta_username):
 
     if comment_info['meta']['code'] == 200:
         if len(comment_info['data']):
-            #Here's a naive implementation of how to delete the negative comments :)
             for x in range(0, len(comment_info['data'])):
                 comment_id = comment_info['data'][x]['id']
                 comment_text = comment_info['data'][x]['text']
@@ -211,38 +207,48 @@ def delete_negative_comment(insta_username):
     else:
         print 'Status code other than 200 received!'
 
-'''
+
+name=[]
+a=[]
+b=[]
+
+
+
 def tag_name():
-  name = raw_input('enter the HashTag you want to search')
-  request_url = (BASE_URL + 'tags/search?q=%s&access_token=%s') % (name, APP_ACCESS_TOKEN)
-  print 'GET request url : %s' % (request_url)
-  tag_list = requests.get(request_url).json()
-  if tag_list['meta']['code'] == 200:
-    if len(tag_list['data']):
-      for i in range(0, len(tag_list['data'])):
-        a = tag_list['data'][i]['media_count']
-        b = tag_list['data'][i]['name']
-        c.append(a)
-        d.append(b)
-      print c
-      print d
-      labels =
-      sizes = [15, 30, 45, 10]
-      explode = (0, 0.1, 0, 0)
+    for i in range(4):
+        names = raw_input('enter the HashTag you want to search ')
+        name.append(names)
+        request_url = (BASE_URL + 'tags/%s?access_token=%s') % (names , APP_ACCESS_TOKEN)
+        print 'GET request url : %s' % (request_url)
+        tag_list = requests.get(request_url).json()
+        if tag_list['meta']['code'] == 200:
+            if len(tag_list['data']):
+                a= tag_list['data']['media_count']
+                b.append(a)
+                print b
+                print name
+            else:
+                print 'There is no recent post of the user!'
+                exit()
+        else:
+            print 'Status code other than 200 received!'
+            exit()
+    x = np.arange(4)
 
-      fig1, ax1 = plt.subplots()
-      ax1.pie(sizes, explode=explode, labels=labels, autopct='%1.1f%%',
-              shadow=True, startangle=90)
-      ax1.axis('equal')
-      plt.show()
-    else:
-      print 'There is no recent post of the user!'
-      exit()
-  else:
-    print 'Status code other than 200 received!'
-    exit()
 
-'''
+    def millions(x, pos):
+        return '%100.0f' % (x * 1e-1)
+
+    formatter = FuncFormatter(millions)
+
+    fig, ax = plt.subplots()
+    ax.yaxis.set_major_formatter(formatter)
+    plt.bar(x, b)
+    plt.xticks(x, name)
+    plt.show()
+
+plt.show()
+
 
 
 def start_bot():
@@ -259,7 +265,7 @@ def start_bot():
     print '7.Post comment on users post\n'
     print '8.Get list comment on recent post\n'
     print '9.Delete negative comment\n'
-    print '10.Get count of HashTag\n'
+    print '10.Fetch Trending Theme with the help of HashTag\n'
     print '11.Exit'
 
     choice = raw_input('Enter you choice: ')
