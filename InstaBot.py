@@ -203,7 +203,8 @@ def like_a_post(insta_username):
     print 'Your like was unsuccessful. Try again!'
 
 
-#get_like_list function is using for getting the list of people who like your  post by giving the username of the user.
+#get_like_list functi
+#  on is using for getting the list of people who like your  post by giving the username of the user.
 def get_like_list(insta_username):
 
   mid = get_post_id(insta_username)
@@ -211,7 +212,20 @@ def get_like_list(insta_username):
   #Here is the Api to get the list of people who like the post.
   request_url = (BASE_URL + 'media/%s/likes?access_token=%s') % (mid, APP_ACCESS_TOKEN)
   likes_lst = requests.get(request_url).json()
-  print likes_lst
+
+  if likes_lst['meta']['code'] == 200:
+    if len(likes_lst['data']):
+        for i in range(0,len(likes_lst['data'])):
+            #This is for getting the list of people who like your post with their username, fullname and user_id.
+            print 'username is:- %s'  %(likes_lst['data'][i]['username'])
+            print 'Full Name is:- %s' %(likes_lst['data'][i]['full_name'])
+            print 'User Id is :- %s' %(likes_lst['data'][i]['id'])
+    else:
+      print 'There is no recent post of the user!'
+      exit()
+  else:
+    print 'Status code other than 200 received!'
+    exit()
 
 
 #This function is used for post a comment on the recent post of a username by its username.
