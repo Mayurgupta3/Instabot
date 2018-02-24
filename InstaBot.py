@@ -4,8 +4,6 @@ import requests,urllib
 from textblob import TextBlob
 from textblob.sentiments import NaiveBayesAnalyzer
 #This is for importing the plotting library.
-from matplotlib.ticker import FuncFormatter
-import matplotlib.pyplot as plt
 import numpy as np
 
 
@@ -166,6 +164,7 @@ def get_post_id(insta_username):
   print 'GET request url : %s' % (request_url)
   user_media = requests.get(request_url).json()
 
+
   if user_media['meta']['code'] == 200:
     if len(user_media['data']):
 
@@ -313,63 +312,47 @@ def delete_negative_comment(insta_username):
 
 
 
-#There are three array which are use in tag_name function for storing the hashtag, name and the media count.
-name=[]
-a=[]
-b=[]
 
+def geofencing(insta_username):
+    user_id = get_user_id(insta_username)
+    if user_id == None:
+        print 'User does not exist!'
+        exit()
+    request_url = (BASE_URL + 'users/%s/media/recent/?access_token=%s') % (user_id, APP_ACCESS_TOKEN)
+    print 'GET request url : %s' % (request_url)
+    user_media = requests.get(request_url).json()
+    Id = user_media['data'][0]['location']['id']
+    Name = user_media['data'][0]['location']['name']
+    Longitude = user_media['data'][0]['location']['longitude']
+    Latitude = user_media['data'][0]['location']['latitude']
 
+    request_url = (BASE_URL + 'locations/%s/media/recent?access_token=%s') % (Id, APP_ACCESS_TOKEN)
+    print "Request url:%s" % (request_url)
+    access_media = requests.get(request_url).json()
+    print access_media
+    i = 0
+    k = 0
+    length =0
+    if access_media['meta']['code'] == 200:
+        if len(access_media['data']):
 
-
-#tag_name function is use for getting the Analyzer on a trending theme.
-def tag_name():
-
-    #This for loop is using for getting the popular hashtag out of four. if you want to make greater than you change range from 4 to any other.
-    for i in range(4):
-
-        #Here we are taking the hashtag from the user .
-        names = raw_input('enter the HashTag you want to search ')
-
-        #This is for append all the hashtag with other.
-        name.append(names)
-
-        #This is the Api for getting the media count.
-        request_url = (BASE_URL + 'tags/%s?access_token=%s') % (names , APP_ACCESS_TOKEN)
-        print 'GET request url : %s' % (request_url)
-        tag_list = requests.get(request_url).json()
-        if tag_list['meta']['code'] == 200:
-            if len(tag_list['data']):
-                a= tag_list['data']['media_count']
-                b.append(a)
-
-                #This is for printing the media count which is in b and printing the name in name variable.
-                print b
-                print name
+            insta_tag = access_media['data'][0]['tags']
+            if len(insta_tag) > 0:
+                for x in range(0, insta_tag.__len__()):
+                    if insta_tag[x] == 'flood' or insta_tag[x] == 'earthquake':
+                        print 'found'
+                    else:
+                        print 'Not matched'
             else:
-                print 'There is no recent post of the user!'
+                print 'No hash tag'
                 exit()
         else:
-            print 'Status code other than 200 received!'
-            exit()
-    x = np.arange(4)
+            print "No image found of calamity"
+            i -= 1
+    else:
+        print "No media found in the mentioned location"
 
 
-    #This function is use for plotting a graph of all the trending theme.
-    def plot(x, pos):
-        return '%100.0f' % (x * 1e-1)
-
-    formatter = FuncFormatter(plot)
-
-    #This all are the features of the graph like what to print on the x-axis and on y-axis.
-    fig, ax = plt.subplots()
-    ax.yaxis.set_major_formatter(formatter)
-    plt.bar(x, b)
-    plt.xticks(x, name)
-    plt.show()
-
-
-#This function is for showing the grapgh on the screen.
-plt.show()
 
 
 
@@ -391,7 +374,7 @@ def start_bot():
     print '7.Post comment on users post\n'
     print '8.Get list comment on recent post\n'
     print '9.Delete negative comment\n'
-    print '10.Fetch Trending Theme with the help of HashTag\n'
+    print '10.Geo fencing\n'
     print '11.Exit'
 
 
@@ -424,7 +407,8 @@ def start_bot():
       insta_username = raw_input('Enter the username of the user')
       delete_negative_comment(insta_username)
     elif choice == '10':
-      tag_name()
+        insta_username = raw_input('Enter the username of the user')
+        geofencing(insta_username)
     elif choice == '11':
         exit()
     else:
