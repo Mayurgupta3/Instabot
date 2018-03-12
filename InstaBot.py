@@ -312,7 +312,7 @@ def delete_negative_comment(insta_username):
 
 
 
-
+#This is for geofencing in which we get the data of any disater with the location in the form of lonitude and latitude.
 def geofencing(insta_username):
     user_id = get_user_id(insta_username)
     if user_id == None:
